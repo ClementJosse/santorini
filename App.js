@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TouchableOpacity } from 'react-native';
 import 'expo-dev-client';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import React, { useState, useEffect } from 'react';
@@ -7,15 +7,15 @@ import auth from '@react-native-firebase/auth';
 import Header from './Header';
 
 export default function App() {
-  // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
+  const [codePartie, setCodePartie] = useState('');
+  const [showCreateGameView, setShowCreateGameView] = useState(false);
 
   GoogleSignin.configure({
     webClientId:'839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com',
   });
 
-  // Handle user state changes
   function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) setInitializing(false);
@@ -23,94 +23,100 @@ export default function App() {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    return subscriber;
   }, []);
 
-  const onGoogleButtonPress = async () =>{
-    // Check if your device supports Google Play
+  const onGoogleButtonPress = async () => {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
     const { idToken } = await GoogleSignin.signIn();
-  
-    // Create a Google credential with the token
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-  
-    // Sign-in the user with the credential
-    const user_sign_in = auth().signInWithCredential(googleCredential);
-    user_sign_in.then((user) => {
+    const userSignIn = auth().signInWithCredential(googleCredential);
+    userSignIn.then((user) => {
       console.log(user);
     })
-    .catch((error) =>{
+    .catch((error) => {
       console.log(error);
-    })
-  }
+    });
+  };
 
   const signOut = async () => {
-    try{
+    try {
       await GoogleSignin.revokeAccess();
       await auth().signOut();
-    } catch (error){
+    } catch (error) {
       console.error(error);
     }
-  }
+  };
 
-  function genererCodePartie() {
+  const genererCodePartie = () => {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let code = '';
-  
+
     for (let i = 0; i < 5; i++) {
       const caractereAleatoire = caracteres.charAt(Math.floor(Math.random() * caracteres.length));
       code += caractereAleatoire;
     }
-    return code;
-  }
+    setCodePartie(code);
+    console.log("+",code);
+    setShowCreateGameView(true);
+  };
+
+  const revenirEnArriere = () => {
+    setShowCreateGameView(false);
+  };
 
   if (initializing) return null;
 
-  if(!user){
+  if (!user) {
     return (
       <View style={styles.container}>
-        <Header/>
+        <Header />
         <GoogleSigninButton
-          style={{ width:300, height:65, marginTop:300}}
+          style={{ width: 300, height: 65, marginTop: 300 }}
           onPress={onGoogleButtonPress}
         />
       </View>
     );
   }
+
+  if (showCreateGameView) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Code de la partie:</Text>
+        <Text style={styles.code}>{codePartie}</Text>
+        <Button title='< Menu' onPress={revenirEnArriere} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Conteneur supérieur */}
       <View style={styles.upperContainer}>
-        {/* Bouton à gauche */}
         <View style={styles.buttonContainer}>
           <Button title='Se Déconnecter' onPress={signOut} />
         </View>
-  
-        {/* Conteneur pour l'image et le nom au centre */}
+
         <View style={styles.profileContainer}>
-          {/* Image centrée au-dessus du nom */}
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: user.photoURL }}
               style={{ height: 50, width: 50, borderRadius: 75 }}
             />
           </View>
-  
-          {/* Nom centré en dessous de l'image */}
+
           <Text style={styles.text}>{user.displayName}</Text>
         </View>
       </View>
-  
-      {/* Conteneur inférieur pour les boutons */}
+
       <View style={styles.lowerContainer}>
-        <Button title='Créer une partie' onPress={() => console.log(genererCodePartie())} />
-        <Text style={{height: 50}}>{""}</Text>
+        <Button title='Créer une partie' onPress={genererCodePartie} />
+        <Text style={{ height: 50 }}>{''}</Text>
         <Button title='Rejoindre une partie' onPress={() => console.log('Rejoindre une partie')} />
       </View>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -142,5 +148,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 200
   },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  code: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  backButton: {
+    backgroundColor: '#3498db',
+    padding: 10,
+    borderRadius: 5,
+  },
+  backButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  
+
 });
 
