@@ -1,3 +1,6 @@
+// Pour lancer l'application depuis le terminal :
+// npx expo start
+
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image, Button, TextInput  } from 'react-native';
 import 'expo-dev-client';
