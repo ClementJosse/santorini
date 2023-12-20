@@ -1,17 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TextInput  } from 'react-native';
 import 'expo-dev-client';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
 import Header from './Header';
+import ZoneDeTexteEditable from './ZoneDeTexteEditable'
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
   const [codePartie, setCodePartie] = useState('');
+  const getCodePartie = () => {
+    return codePartie;
+  };
   const [showCreateGameView, setShowCreateGameView] = useState(false);
-
+  const [showJoinGameView, setShowJoinGameView] = useState(false);
+  
   GoogleSignin.configure({
     webClientId:'839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com',
   });
@@ -63,7 +68,20 @@ export default function App() {
 
   const revenirEnArriere = () => {
     setShowCreateGameView(false);
+    setShowJoinGameView(false);
+    console.log("menu")
   };
+
+  const supprimerCode = () => {
+    console.log("-",getCodePartie())
+    let code = '';
+    setCodePartie(code);
+  };
+
+  const goToJoinGameView = () => {
+    setShowJoinGameView(true);
+  };
+
 
   if (initializing) return null;
 
@@ -82,12 +100,38 @@ export default function App() {
   if (showCreateGameView) {
     return (
       <View style={styles.container}>
+        <View style={styles.buttonContainer}>
+        <Button title="< Menu" onPress={() => { supprimerCode(); revenirEnArriere();  }} />
+        </View>
         <Text style={styles.title}>Code de la partie:</Text>
-        <Text style={styles.code}>{codePartie}</Text>
-        <Button title='< Menu' onPress={revenirEnArriere} />
+        <Text style={styles.code}>{codePartie}</Text> 
       </View>
     );
   }
+
+  if (showJoinGameView) {
+    // Créez une fonction de rappel pour récupérer le code de la zone de texte
+    const handleCodeChange = (nouveauCode) => {
+      // Mettez à jour l'état avec le nouveau code
+      setCodePartie(nouveauCode);
+    };
+  
+    return (
+      <View style={styles.container}>
+        <View style={styles.buttonContainer}>
+          <Button title="< Menu" onPress={revenirEnArriere} />
+        </View>
+        <Text style={styles.title}>Code de la partie:</Text>
+        {/* Passez la fonction de rappel au composant ZoneDeTexteEditable */}
+        <ZoneDeTexteEditable onTextChange={handleCodeChange} />
+        <View style={styles.buttonContainer}>
+          <Button title="Join" onPress={() => console.log("Code entré depuis ZoneDeTexteEditable:", codePartie)} />
+        </View>
+      </View>
+    );
+  }
+  
+  
 
   return (
     <View style={styles.container}>
@@ -111,7 +155,7 @@ export default function App() {
       <View style={styles.lowerContainer}>
         <Button title='Créer une partie' onPress={genererCodePartie} />
         <Text style={{ height: 50 }}>{''}</Text>
-        <Button title='Rejoindre une partie' onPress={() => console.log('Rejoindre une partie')} />
+        <Button title='Rejoindre une partie' onPress={goToJoinGameView} />
       </View>
     </View>
   );
