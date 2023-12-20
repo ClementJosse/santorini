@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "839487671755",
+    "project_id": "santorini-1218d",
+    "storage_bucket": "santorini-1218d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839487671755:android:6d87e86c4b1b2fbb2dfa4e",
+        "android_client_info": {
+          "package_name": "com.clementjosse.santorini"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "839487671755-5n7rtkra1dgol4necm83g349r6qrm50m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.clementjosse.santorini",
+            "certificate_hash": "587724c5fed58f18dde98abd87b90a2b471ee32e"
+          }
+        },
+        {
+          "client_id": "839487671755-go2dpsq0u0be862266lq0r5ko46veu2a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.clementjosse.santorini",
+            "certificate_hash": "4571b3742df9f74bc7b74b70b6e69fd9a3d89803"
+          }
+        },
+        {
+          "client_id": "839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh-WBJmUSDSxqvJ8b2QprP5oeSBrPYxMc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
