@@ -9,7 +9,7 @@ import auth from '@react-native-firebase/auth';
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import ZoneDeTexteEditable from './ZoneDeTexteEditable';
-import { ref, set, update, remove} from "firebase/database";
+import { getDatabase, ref, set, child, get, update, remove} from "firebase/database";
 import { db } from './firebaseconfig';
 
 export default function App() {
@@ -72,9 +72,11 @@ export default function App() {
     console.log("+",code);
     setShowCreateGameView(true);
 
+    //POST DATA
     set(ref(db, 'games/' + code), {
       host_name: user.displayName,
-      host_picture : user.photoURL
+      host_picture : user.photoURL,
+      game_status : "waiting"
     }).catch((error) => {
       alert(error);
     });
@@ -90,11 +92,42 @@ export default function App() {
   const supprimerCode = () => {
     let code = getCodePartie()
     console.log("-",code)
-    remove(ref(db, 'games/' + code));
+    
+    // DELETE DATA
+    //remove(ref(db, 'games/' + code));
     code = '';
     setCodePartie(code);
 
   };
+
+  const JoinGame = (codePartie) => {
+    const dbRef = ref(getDatabase());
+  
+    // GET DATA
+    get(child(dbRef, 'games/' + codePartie)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const gameData = snapshot.val();
+        const gameStatus = gameData.game_status;
+        
+        console.log("Read data: "+codePartie," Status: "+ gameStatus);
+
+        if(gameStatus=="waiting"){
+          
+          console.log("update game")
+        }
+        else{
+          console.log("lobby non disponible")
+        }
+      } else {
+        console.log("No data available at games/"+codePartie);
+      }
+
+    }).catch((error) => {
+      console.error(error);
+    });
+  };
+  
+
 
   const goToJoinGameView = () => {
     setShowJoinGameView(true);
@@ -143,7 +176,7 @@ export default function App() {
         {/* Passez la fonction de rappel au composant ZoneDeTexteEditable */}
         <ZoneDeTexteEditable onTextChange={handleCodeChange} />
         <View style={styles.buttonContainer}>
-          <Button title="Join" onPress={() => console.log("Code entré depuis ZoneDeTexteEditable:", codePartie)} />
+          <Button title="Join" onPress={() => {JoinGame(codePartie);}} />
         </View>
       </View>
     );

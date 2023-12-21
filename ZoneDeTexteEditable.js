@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
+import { View, TextInput } from 'react-native';
 
 const ZoneDeTexteEditable = ({ onTextChange }) => {
   const [contenu, setContenu] = useState('');
 
   const handleTextChange = (text) => {
-    setContenu(text);
-    // Appel de la fonction de rappel avec le contenu de la zone de texte
-    onTextChange(text);
+    const texteEnMajuscules = text.toUpperCase(); // Conversion en majuscules
+    setContenu(texteEnMajuscules);
+    // Appel de la fonction de rappel avec le contenu de la zone de texte en majuscules
+    onTextChange(texteEnMajuscules);
   };
 
   return (
@@ -20,7 +21,6 @@ const ZoneDeTexteEditable = ({ onTextChange }) => {
         multiline
         numberOfLines={4}
       />
-      {/* Pas besoin du bouton ici, car on ne console.log pas directement depuis ce composant */}
     </View>
   );
 };
