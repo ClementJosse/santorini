@@ -2,18 +2,22 @@
 // npx expo start
 
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button, TextInput  } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TextInput } from 'react-native';
 import 'expo-dev-client';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
-import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import ZoneDeTexteEditable from './ZoneDeTexteEditable'
+import ZoneDeTexteEditable from './ZoneDeTexteEditable';
+import { ref, set, update, remove} from "firebase/database";
+import { db } from './firebaseconfig';
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
   const [codePartie, setCodePartie] = useState('');
+
+
   const getCodePartie = () => {
     return codePartie;
   };
@@ -67,6 +71,14 @@ export default function App() {
     setCodePartie(code);
     console.log("+",code);
     setShowCreateGameView(true);
+
+    set(ref(db, 'games/' + code), {
+      host_name: user.displayName,
+      host_picture : user.photoURL
+    }).catch((error) => {
+      alert(error);
+    });
+
   };
 
   const revenirEnArriere = () => {
@@ -76,9 +88,12 @@ export default function App() {
   };
 
   const supprimerCode = () => {
-    console.log("-",getCodePartie())
-    let code = '';
+    let code = getCodePartie()
+    console.log("-",code)
+    remove(ref(db, 'games/' + code));
+    code = '';
     setCodePartie(code);
+
   };
 
   const goToJoinGameView = () => {
