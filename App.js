@@ -76,7 +76,11 @@ export default function App() {
     set(ref(db, 'games/' + code), {
       host_name: user.displayName,
       host_picture : user.photoURL,
-      game_status : "waiting"
+      game_status : "waiting",
+      guest_name:'',
+      guest_picture:'',
+      turn:'host',
+      last_move:''
     }).catch((error) => {
       alert(error);
     });
@@ -114,6 +118,14 @@ export default function App() {
         if(gameStatus=="waiting"){
           
           console.log("update game")
+          update(ref(db, 'games/' + codePartie), {
+            game_status : "filled",
+            guest_name: user.displayName,
+            guest_picture: user.photoURL,
+          }).catch((error) => {
+            alert(error);
+          });
+
         }
         else{
           console.log("lobby non disponible")
@@ -127,6 +139,16 @@ export default function App() {
     });
   };
   
+
+  const QuitterGame = (codePartie) => {
+    update(ref(db, 'games/' + codePartie), {
+      game_status : "waiting",
+      guest_name: '',
+      guest_picture: '',
+    }).catch((error) => {
+      alert(error);
+    });
+  }
 
 
   const goToJoinGameView = () => {
@@ -170,7 +192,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
-          <Button title="< Menu" onPress={revenirEnArriere} />
+          <Button title="< Menu" onPress={() => {QuitterGame(codePartie); revenirEnArriere();}} />
         </View>
         <Text style={styles.title}>Code de la partie:</Text>
         {/* Passez la fonction de rappel au composant ZoneDeTexteEditable */}
