@@ -128,10 +128,10 @@ export default function App() {
 
         }
         else{
-          console.log("lobby non disponible")
+          alert(codePartie,"lobby occupé");
         }
       } else {
-        console.log("No data available at games/"+codePartie);
+        alert("le lobby "+codePartie+" n'existe pas");
       }
 
     }).catch((error) => {
@@ -148,6 +148,7 @@ export default function App() {
     }).catch((error) => {
       alert(error);
     });
+    console.log(codePartie)
   }
 
 
@@ -198,7 +199,7 @@ export default function App() {
         {/* Passez la fonction de rappel au composant ZoneDeTexteEditable */}
         <ZoneDeTexteEditable onTextChange={handleCodeChange} />
         <View style={styles.buttonContainer}>
-          <Button title="Join" onPress={() => {JoinGame(codePartie);}} />
+          <Button title="Rejoindre" onPress={() => {JoinGame(codePartie);}} />
         </View>
       </View>
     );
