@@ -16,11 +16,14 @@ export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
   const [codePartie, setCodePartie] = useState('');
-
-
+  const [gameData, setGameData] = useState(null);
+  
   const getCodePartie = () => {
     return codePartie;
   };
+  const getGameData = () => {
+    return gameData;
+  }
   const [showCreateGameView, setShowCreateGameView] = useState(false);
   const [showJoinGameView, setShowJoinGameView] = useState(false);
   const [showWaitingRoom, setShowWaitingRoom] = useState(false);
@@ -100,9 +103,9 @@ export default function App() {
   };
 
   const JoinGame = (codePartie) => {
-    const dbRef = ref(getDatabase());
-  
+    
     // GET DATA
+    const dbRef = ref(getDatabase());
     get(child(dbRef, 'games/' + codePartie)).then((snapshot) => {
       if (snapshot.exists()) {
         const gameData = snapshot.val();
@@ -121,12 +124,14 @@ export default function App() {
             alert(error);
           });
 
+          setShowWaitingRoom(true);
+          setShowJoinGameView(false);
         }
         else{
-          alert(codePartie,"lobby occupé");
+          alert("la partie "+codePartie+" est occupée");
         }
       } else {
-        alert("le lobby "+codePartie+" n'existe pas");
+        alert("la partie "+codePartie+" n'existe pas");
       }
 
     }).catch((error) => {
@@ -135,8 +140,8 @@ export default function App() {
   };
   
 
-  const QuitterGame = (codePartie) => {
-    update(ref(db, 'games/' + codePartie), {
+  const QuitterGame = () => {
+    update(ref(db, 'games/' + getCodePartie), {
       game_status : "waiting",
       guest_name: '',
       guest_picture: '',
@@ -190,6 +195,34 @@ export default function App() {
         <ZoneDeTexteEditable onTextChange={handleCodeChange} />
         <View style={styles.buttonContainer}>
           <Button title="Rejoindre" onPress={() => {JoinGame(codePartie);}} />
+        </View>
+      </View>
+    );
+  }
+  
+  if (showWaitingRoom) {
+    const game = getGameData()
+    return (
+      <View style={[styles.container]}>
+        <View style={[styles.upperContainer]}>
+          <Image source={{ uri: game.host_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}
+          />
+          <Text>{game.host_name}</Text>
+
+          <Image source={{ uri: game.guest_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}/>
+          <Text>{game.guest_name}</Text>
+        </View>
+  
+        <View>
+          <Button
+            title="< Retour"
+            onPress={() => {
+              setShowWaitingRoom(false);
+              setShowJoinGameView(true);
+            }}
+          />
         </View>
       </View>
     );
