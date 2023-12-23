@@ -9,24 +9,22 @@ import auth from '@react-native-firebase/auth';
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import ZoneDeTexteEditable from './ZoneDeTexteEditable';
-import { getDatabase, ref, set, child, get, update, remove} from "firebase/database";
+import { getDatabase, ref, set, child, get, update, remove, onValue} from "firebase/database";
 import { db } from './firebaseconfig';
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState(null);
   const [codePartie, setCodePartie] = useState('');
-  const [gameData, setGameData] = useState(null);
+  const [currentGameData, setCurrentGameData] = useState(null);
   
   const getCodePartie = () => {
     return codePartie;
   };
-  const getGameData = () => {
-    return gameData;
-  }
   const [showCreateGameView, setShowCreateGameView] = useState(false);
   const [showJoinGameView, setShowJoinGameView] = useState(false);
   const [showWaitingRoom, setShowWaitingRoom] = useState(false);
+  const [isDataFetched, setIsDataFetched] = useState(false);
   const [whoAmI, setWhoAmI] = useState('')
   
   GoogleSignin.configure({
@@ -39,9 +37,33 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (showWaitingRoom || showCreateGameView) {
+      const fetchGameData = async () => {
+        const db = getDatabase();
+        const gameDataRef = ref(db, 'games/' + codePartie);
+  
+        onValue(gameDataRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data === null) {
+            setCurrentGameData(null);
+            setIsDataFetched(false);
+            setShowCreateGameView(false);
+            setShowWaitingRoom(false);
+            console.log("La référence a été supprimée !");
+          } else {
+            setCurrentGameData(data);
+            setIsDataFetched(true);
+            console.log("Update !");
+          }
+        });
+      };
+  
+      fetchGameData(); // Appelez la fonction fetchGameData
+    }
+
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber;
-  }, []);
+  }, [showWaitingRoom,showCreateGameView]);
 
   const onGoogleButtonPress = async () => {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -141,7 +163,7 @@ export default function App() {
   
 
   const QuitterGame = () => {
-    update(ref(db, 'games/' + getCodePartie), {
+    update(ref(db, 'games/' + codePartie), {
       game_status : "waiting",
       guest_name: '',
       guest_picture: '',
@@ -166,16 +188,41 @@ export default function App() {
     );
   }
 
-  if (showCreateGameView) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.buttonContainer}>
-        <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); console.log("menu") }} />
+  if (showCreateGameView && isDataFetched) {
+    if(currentGameData.game_status=='waiting'){
+      console.log("ici")
+      return (
+        <View style={styles.container}>
+          <View style={styles.buttonContainer}>
+          <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); setIsDataFetched(false); console.log("menu") }} />
+          </View>
+          <Text style={styles.title}>Code de la partie:</Text>
+          <Text style={styles.code}>{codePartie}</Text> 
         </View>
-        <Text style={styles.title}>Code de la partie:</Text>
-        <Text style={styles.code}>{codePartie}</Text> 
-      </View>
-    );
+      );
+    }
+    else{
+      console.log("là")
+      return(
+        <View style={styles.container}>
+          <View style={styles.buttonContainer}>
+          <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); console.log("menu") }} />
+          </View>
+          <Text style={styles.title}>Code de la partie:</Text>
+          <Text style={styles.code}>{codePartie}</Text> 
+          <View style={[styles.upperContainer]}>
+          <Image source={{ uri: currentGameData.host_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}
+          />
+          <Text>{currentGameData.host_name}</Text>
+
+          <Image source={{ uri: currentGameData.guest_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}/>
+          <Text>{currentGameData.guest_name}</Text>
+        </View>
+        </View>
+      );
+    }
   }
 
   if (showJoinGameView) {
@@ -200,29 +247,30 @@ export default function App() {
     );
   }
   
-  if (showWaitingRoom) {
-    const game = getGameData()
+  if (showWaitingRoom && isDataFetched) {
+    console.log(currentGameData)
     return (
       <View style={[styles.container]}>
-        <View style={[styles.upperContainer]}>
-          <Image source={{ uri: game.host_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}
-          />
-          <Text>{game.host_name}</Text>
-
-          <Image source={{ uri: game.guest_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}/>
-          <Text>{game.guest_name}</Text>
-        </View>
-  
         <View>
           <Button
             title="< Retour"
             onPress={() => {
+              QuitterGame(codePartie);
               setShowWaitingRoom(false);
               setShowJoinGameView(true);
+              setIsDataFetched(false)
             }}
           />
+        </View>
+        <View style={[styles.upperContainer]}>
+          <Image source={{ uri: currentGameData.host_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}
+          />
+          <Text>{currentGameData.host_name}</Text>
+
+          <Image source={{ uri: currentGameData.guest_picture }} 
+          style={{ height: 50, width: 50, borderRadius: 75 }}/>
+          <Text>{currentGameData.guest_name}</Text>
         </View>
       </View>
     );
