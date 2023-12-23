@@ -248,7 +248,6 @@ export default function App() {
   }
   
   if (showWaitingRoom && isDataFetched) {
-    console.log(currentGameData)
     return (
       <View style={[styles.container]}>
         <View>
