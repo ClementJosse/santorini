@@ -23,6 +23,8 @@ export default function App() {
   };
   const [showCreateGameView, setShowCreateGameView] = useState(false);
   const [showJoinGameView, setShowJoinGameView] = useState(false);
+  const [showWaitingRoom, setShowWaitingRoom] = useState(false);
+  const [whoAmI, setWhoAmI] = useState('')
   
   GoogleSignin.configure({
     webClientId:'839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com',
@@ -70,7 +72,6 @@ export default function App() {
     }
     setCodePartie(code);
     console.log("+",code);
-    setShowCreateGameView(true);
 
     //POST DATA
     set(ref(db, 'games/' + code), {
@@ -85,12 +86,6 @@ export default function App() {
       alert(error);
     });
 
-  };
-
-  const revenirEnArriere = () => {
-    setShowCreateGameView(false);
-    setShowJoinGameView(false);
-    console.log("menu")
   };
 
   const supprimerCode = () => {
@@ -148,13 +143,8 @@ export default function App() {
     }).catch((error) => {
       alert(error);
     });
-    console.log(codePartie)
   }
 
-
-  const goToJoinGameView = () => {
-    setShowJoinGameView(true);
-  };
 
 
   if (initializing) return null;
@@ -175,7 +165,7 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
-        <Button title="< Menu" onPress={() => { supprimerCode(); revenirEnArriere();  }} />
+        <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); console.log("menu") }} />
         </View>
         <Text style={styles.title}>Code de la partie:</Text>
         <Text style={styles.code}>{codePartie}</Text> 
@@ -193,9 +183,9 @@ export default function App() {
     return (
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
-          <Button title="< Menu" onPress={() => {QuitterGame(codePartie); revenirEnArriere();}} />
+          <Button title="< Menu" onPress={() => {setShowJoinGameView(false); setWhoAmI(''); console.log("menu")}} />
         </View>
-        <Text style={styles.title}>Code de la partie:</Text>
+        <Text style={styles.title}>Entrez le code de la partie:</Text>
         {/* Passez la fonction de rappel au composant ZoneDeTexteEditable */}
         <ZoneDeTexteEditable onTextChange={handleCodeChange} />
         <View style={styles.buttonContainer}>
@@ -225,11 +215,11 @@ export default function App() {
           <Text style={styles.text}>{user.displayName}</Text>
         </View>
       </View>
-
+      
       <View style={styles.lowerContainer}>
-        <Button title='Créer une partie' onPress={genererCodePartie} />
+        <Button title='Créer une partie' onPress={() => {genererCodePartie(); setShowCreateGameView(true); setWhoAmI('host')}} />
         <Text style={{ height: 50 }}>{''}</Text>
-        <Button title='Rejoindre une partie' onPress={goToJoinGameView} />
+        <Button title='Rejoindre une partie' onPress={() => {setShowJoinGameView(true); setWhoAmI('guest')}} />
       </View>
     </View>
   );
