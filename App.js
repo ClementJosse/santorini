@@ -11,6 +11,7 @@ import Header from './Header';
 import ZoneDeTexteEditable from './ZoneDeTexteEditable';
 import { getDatabase, ref, set, child, get, update, remove, onValue} from "firebase/database";
 import { db } from './firebaseconfig';
+import BoardGameView from './BoardGameView';
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
@@ -23,7 +24,8 @@ export default function App() {
   };
   const [showCreateGameView, setShowCreateGameView] = useState(false);
   const [showJoinGameView, setShowJoinGameView] = useState(false);
-  const [showWaitingRoom, setShowWaitingRoom] = useState(false);
+  const [showWaitingRoom, setShowWaitingRoomView] = useState(false);
+  const [showBoardGameView, setShowBoardGameView] = useState(false);
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [whoAmI, setWhoAmI] = useState('')
   
@@ -48,7 +50,9 @@ export default function App() {
             setCurrentGameData(null);
             setIsDataFetched(false);
             setShowCreateGameView(false);
-            setShowWaitingRoom(false);
+            setShowJoinGameView(false);
+            setShowWaitingRoomView(false);
+            setShowCreateGameView(false);
             console.log("La référence a été supprimée !");
           } else {
             setCurrentGameData(data);
@@ -63,7 +67,7 @@ export default function App() {
 
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber;
-  }, [showWaitingRoom,showCreateGameView]);
+  }, [showWaitingRoom,showCreateGameView,showBoardGameView]);
 
   const onGoogleButtonPress = async () => {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -146,7 +150,7 @@ export default function App() {
             alert(error);
           });
 
-          setShowWaitingRoom(true);
+          setShowWaitingRoomView(true);
           setShowJoinGameView(false);
         }
         else{
@@ -198,6 +202,17 @@ export default function App() {
           </View>
           <Text style={styles.title}>Code de la partie:</Text>
           <Text style={styles.code}>{codePartie}</Text> 
+          <View style={[styles.upperContainer]}>
+            <View style={styles.profileContainer}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: user.photoURL }}
+                  style={{ height: 50, width: 50, borderRadius: 75 }}
+                />
+              </View>
+              <Text style={styles.text}>{user.displayName}</Text>
+            </View>
+          </View>
         </View>
       );
     }
@@ -210,16 +225,34 @@ export default function App() {
           </View>
           <Text style={styles.title}>Code de la partie:</Text>
           <Text style={styles.code}>{codePartie}</Text> 
-          <View style={[styles.upperContainer]}>
-          <Image source={{ uri: currentGameData.host_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}
-          />
-          <Text>{currentGameData.host_name}</Text>
-
-          <Image source={{ uri: currentGameData.guest_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}/>
-          <Text>{currentGameData.guest_name}</Text>
-        </View>
+          <View style={[styles.versusContainer]}>
+            <View style={styles.profileContainer}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: user.photoURL }}
+                  style={{ height: 50, width: 50, borderRadius: 75 }}
+                />
+              </View>
+              <Text style={styles.text}>{user.displayName}</Text>
+            </View>
+            <View style={styles.profileContainer}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: currentGameData.guest_picture }}
+                  style={{ height: 50, width: 50, borderRadius: 75 }}
+                />
+              </View>
+              <Text style={styles.text}>{currentGameData.guest_name}</Text>
+            </View>   
+          </View>
+          <View style={styles.buttonContainer}>
+          <Button title="Lancer la partie" onPress={() => { 
+            console.log("lancer la partie");
+            update(ref(db, 'games/' + codePartie), {game_status : "running"}).catch((error) => {alert(error);});
+            setShowBoardGameView(true);
+            setShowCreateGameView(false);
+          }}/>
+          </View>
         </View>
       );
     }
@@ -248,6 +281,11 @@ export default function App() {
   }
   
   if (showWaitingRoom && isDataFetched) {
+    if(currentGameData.game_status=="running"){
+      setShowWaitingRoomView(false);
+      setShowBoardGameView(true);
+    }
+
     return (
       <View style={[styles.container]}>
         <View>
@@ -255,7 +293,7 @@ export default function App() {
             title="< Retour"
             onPress={() => {
               QuitterGame(codePartie);
-              setShowWaitingRoom(false);
+              setShowWaitingRoomView(false);
               setShowJoinGameView(true);
               setIsDataFetched(false)
             }}
@@ -271,6 +309,14 @@ export default function App() {
           style={{ height: 50, width: 50, borderRadius: 75 }}/>
           <Text>{currentGameData.guest_name}</Text>
         </View>
+      </View>
+    );
+  }
+
+  if (showBoardGameView && isDataFetched) {
+    return (
+      <View style={[styles.container]}>
+        <BoardGameView />
       </View>
     );
   }
@@ -316,6 +362,11 @@ const styles = StyleSheet.create({
   upperContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  versusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   buttonContainer: {
