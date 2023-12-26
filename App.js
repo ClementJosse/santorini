@@ -358,6 +358,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1, // Permet à la vue de s'étendre pour occuper tout l'espace vertical disponible
     justifyContent: 'center', // Centre les éléments horizontalement
+    backgroundColor: '#84D2F9',
   },
   upperContainer: {
     flexDirection: 'row',
@@ -390,11 +391,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginTop: 10,
   },
   code: {
-    fontSize: 18,
+    fontSize: 40,
     marginBottom: 20,
+    fontWeight: 'bold',
   },
   backButton: {
     backgroundColor: '#3498db',
