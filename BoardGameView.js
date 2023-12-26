@@ -38,6 +38,8 @@ const BoardGameView = () => {
       {Array.from({ length: numRows }).map((_, rowIndex) => renderRow(rowIndex))}
       <View style={styles.row}>
         <Image source={require('./assets/pion_o.png')} style={styles.image} />
+        <Image source={require('./assets/pion_o.png')} style={styles.image} />
+        <Image source={require('./assets/pion_v.png')} style={styles.image} />
         <Image source={require('./assets/pion_v.png')} style={styles.image} />
       </View>
     </View>
