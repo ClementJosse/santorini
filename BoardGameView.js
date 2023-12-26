@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, StyleSheet, Dimensions } from 'react-native';
 
-const calcul = -((100)/(450))*((Dimensions.get('window').width)/(5));
+const calcul = -((100) / (450)) * (Dimensions.get('window').width / 5);
 
 // Importez les images de manière statique
 const images = {
@@ -36,6 +36,10 @@ const BoardGameView = () => {
   return (
     <View style={styles.container}>
       {Array.from({ length: numRows }).map((_, rowIndex) => renderRow(rowIndex))}
+      <View style={styles.row}>
+        <Image source={require('./assets/pion_o.png')} style={styles.image} />
+        <Image source={require('./assets/pion_v.png')} style={styles.image} />
+      </View>
     </View>
   );
 };
