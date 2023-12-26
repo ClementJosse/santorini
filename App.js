@@ -39,7 +39,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (showWaitingRoom || showCreateGameView) {
+    if (showWaitingRoom || showCreateGameView || showBoardGameView ) {
       const fetchGameData = async () => {
         const db = getDatabase();
         const gameDataRef = ref(db, 'games/' + codePartie);
@@ -316,7 +316,7 @@ export default function App() {
   if (showBoardGameView && isDataFetched) {
     return (
       <View style={[styles.container]}>
-        <BoardGameView />
+        <BoardGameView whoAmI={whoAmI} currentGameData={currentGameData} codePartie={codePartie}/>
       </View>
     );
   }
