@@ -14,7 +14,7 @@ const ZoneDeTexteEditable = ({ onTextChange }) => {
   return (
     <View>
       <TextInput
-        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10, paddingHorizontal: 10 }}
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10, paddingHorizontal: 10, backgroundColor: '#ffffff',}}
         placeholder="Entrez le code ici"
         onChangeText={handleTextChange}
         value={contenu}
