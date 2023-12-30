@@ -110,7 +110,6 @@ export default function App() {
       guest_name:'',
       guest_picture:'',
       turn:'host',
-      last_move:''
     }).catch((error) => {
       alert(error);
     });
@@ -218,6 +217,15 @@ export default function App() {
     }
     else{
       console.log("là")
+
+      const initPlateau = [];
+      for (let i = 0; i < 5; i++) {
+        initPlateau[i] = [];
+        for (let j = 0; j < 5; j++) {
+          initPlateau[i][j] = 0;
+        }
+      }
+
       return(
         <View style={styles.container}>
           <View style={styles.buttonContainer}>
@@ -248,7 +256,10 @@ export default function App() {
           <View style={styles.buttonContainer}>
           <Button title="Lancer la partie" onPress={() => { 
             console.log("lancer la partie");
-            update(ref(db, 'games/' + codePartie), {game_status : "running"}).catch((error) => {alert(error);});
+            update(ref(db, 'games/' + codePartie), {
+              game_status : "running",
+              board : initPlateau
+              }).catch((error) => {alert(error);});
             setShowBoardGameView(true);
             setShowCreateGameView(false);
           }}/>

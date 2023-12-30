@@ -16,20 +16,27 @@ const images = {
 const BoutonTest = (codePartie, whoAmI) => {
   const newTurn = whoAmI === 'host' ? 'guest' : 'host';
   update(ref(db, 'games/' + codePartie), {
-    turn: newTurn,
-    last_move: Math.random(),
+    turn: newTurn
   }).catch((error) => {
     alert(error);
   });
 };
 
+const UpdateBoard = (codePartie, rowIndex, colIndex,currentGameData) => {
+  update(ref(db, `games/${codePartie}/board/${colIndex}`), {
+    [rowIndex]: (currentGameData.board[colIndex][rowIndex]+1)%5,
+  }).catch((error) => {
+    alert(error);
+  });
+  console.log("test d'update à"+rowIndex,colIndex)
+}
+
 const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
   const numRows = 5;
   const numCols = 5;
 
-  const getRandomImage = () => {
-    const randomIndex = Math.floor(Math.random() * Object.keys(images).length);
-    return images[randomIndex.toString()];
+  const getImage = (colIndex,rowIndex) => {
+    return images[currentGameData.board[colIndex][rowIndex]];
   };
 
   const renderRow = (rowIndex) => (
@@ -39,10 +46,11 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
           key={colIndex.toString()}
           onPress={() => {
             console.log(`Clicked at position [${rowIndex};${colIndex}]`);
+            UpdateBoard(codePartie,rowIndex,colIndex,currentGameData);
           }}
         >
           <Image
-            source={getRandomImage()}
+            source={getImage(colIndex,rowIndex)}
             style={[styles.image, colIndex !== 0 && { marginLeft: calcul }]}
           />
         </TouchableOpacity>
@@ -64,6 +72,7 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
           title="TOUR"
           onPress={() => {
             console.log(whoAmI);
+            console.log(currentGameData.board)
             BoutonTest(codePartie, whoAmI);
           }}
         />
