@@ -28,7 +28,6 @@ const UpdateBoard = (codePartie, rowIndex, colIndex,currentGameData) => {
   }).catch((error) => {
     alert(error);
   });
-  console.log("test d'update à"+rowIndex,colIndex)
 }
 
 const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
@@ -46,7 +45,9 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
           key={colIndex.toString()}
           onPress={() => {
             console.log(`Clicked at position [${rowIndex};${colIndex}]`);
-            UpdateBoard(codePartie,rowIndex,colIndex,currentGameData);
+            if(currentGameData.turn === whoAmI){
+              UpdateBoard(codePartie,rowIndex,colIndex,currentGameData);
+            }
           }}
         >
           <Image
