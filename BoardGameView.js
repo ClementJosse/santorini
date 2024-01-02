@@ -5,7 +5,22 @@ import { db } from './firebaseconfig';
 
 const calcul = -((100) / 450) * (Dimensions.get('window').width / 5);
 
-const images = {
+var turnstatus = 'pion';
+
+var selectedRow = '';
+var selectedCol = '';
+
+function DansLeCarre(rowIndex,colIndex){
+  console.log(selectedRow+1 <= rowIndex && selectedRow-1 >= rowIndex && selectedCol+1 <= colIndex && selectedCol-1 >= colIndex)
+  if(selectedRow+1 <= rowIndex && selectedRow-1 >= rowIndex && selectedCol+1 <= colIndex && selectedCol-1 >= colIndex ){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+const imageCase = {
   0: require('./assets/0.png'),
   1: require('./assets/1.png'),
   2: require('./assets/2.png'),
@@ -13,8 +28,24 @@ const images = {
   4: require('./assets/4.png'),
 };
 
+const imagePionO = {
+  0: require('./assets/0pion_o.png'),
+  1: require('./assets/1pion_o.png'),
+  2: require('./assets/2pion_o.png'),
+  3: require('./assets/3pion_o.png'),
+  4: require('./assets/3pion_o.png'),
+}
+
+const imagePionV = {
+  0: require('./assets/0pion_v.png'),
+  1: require('./assets/1pion_v.png'),
+  2: require('./assets/2pion_v.png'),
+  3: require('./assets/3pion_v.png'),
+  4: require('./assets/3pion_v.png'),
+}
+
 const BoutonTest = (codePartie, whoAmI) => {
-  const newTurn = whoAmI === 'host' ? 'guest' : 'host';
+  const newTurn = whoAmI === 'v' ? 'o' : 'v';
   update(ref(db, 'games/' + codePartie), {
     turn: newTurn,
   }).catch((error) => {
@@ -34,8 +65,17 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
   const numRows = 5;
   const numCols = 5;
 
-  const getImage = (colIndex, rowIndex) => {
-    return images[currentGameData.board[colIndex][rowIndex]];
+  const getImageCase = (colIndex, rowIndex) => {
+    return imageCase[currentGameData.board[colIndex][rowIndex]];
+  };
+
+  const getImagePion = (colIndex, rowIndex, type) => {
+    if(type==="o"){
+      return imagePionO[currentGameData.board[colIndex][rowIndex]]
+    }
+    else{
+      return imagePionV[currentGameData.board[colIndex][rowIndex]];
+    }
   };
 
   const renderRow = (rowIndex) => (
@@ -46,18 +86,38 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
           onPress={() => {
             console.log(`Clicked at position [${rowIndex};${colIndex}]`);
             if (currentGameData.turn === whoAmI) {
-              UpdateBoard(codePartie, rowIndex, colIndex, currentGameData);
+              if(turnstatus == "pion"){
+                if(currentGameData.turn == currentGameData.pion[rowIndex][colIndex]){
+                  selectedCol = colIndex;
+                  selectedRow = rowIndex;
+                  turnstatus = "selectPion"
+                  console.log(turnstatus)
+                }
+              }
+              else if(turnstatus == "selectPion"){
+                if(currentGameData.turn == currentGameData.pion[rowIndex][colIndex]){
+                  selectedCol = '';
+                  selectedRow = '';
+                  turnstatus = "pion"
+                  console.log(turnstatus)
+                }
+                else if(DansLeCarre(rowIndex,colIndex)){
+                  console.log("dans le carré !")
+                }
+              }
             }
+
+
           }}
         >
           <View style={styles.cell}>
             <Image
-              source={getImage(colIndex, rowIndex)}
+              source={getImageCase(colIndex, rowIndex)}
               style={[styles.image, colIndex !== 0 && { marginLeft: calcul }]}
             />
-            {rowIndex === 3 && (
+            {currentGameData.pion[colIndex][rowIndex] != "" && (
               <Image
-                source={require('./assets/1pion_o.png')}
+                source={getImagePion(colIndex, rowIndex, currentGameData.pion[colIndex][rowIndex] )}
                 style={[styles.overlayImage, colIndex !== 0 && { marginLeft: calcul },{ position: 'absolute', top: 0, left: 0 }]}
               />
             )}
@@ -78,11 +138,12 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
       </View>
       {currentGameData.turn === whoAmI && (
         <Button
-          title="TOUR"
+          title="Passer"
           onPress={() => {
             console.log(whoAmI);
             console.log(currentGameData.board);
             BoutonTest(codePartie, whoAmI);
+            setTurnstatus('');
           }}
         />
       )}

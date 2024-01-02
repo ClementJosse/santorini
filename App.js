@@ -57,7 +57,7 @@ export default function App() {
           } else {
             setCurrentGameData(data);
             setIsDataFetched(true);
-            console.log("Update !");
+            console.log("..");
           }
         });
       };
@@ -109,7 +109,7 @@ export default function App() {
       game_status : "waiting",
       guest_name:'',
       guest_picture:'',
-      turn:'host',
+      turn:'v',
     }).catch((error) => {
       alert(error);
     });
@@ -226,6 +226,23 @@ export default function App() {
         }
       }
 
+      const initPion = [];
+      for (let i = 0; i < 5; i++) {
+        initPion[i] = [];
+        for (let j = 0; j < 5; j++) {
+          if((i==1 && j==3 ) || (i==3 && j == 1)){
+            initPion[i][j] = "v";
+          }
+          else if ((i==3 && j==3 ) || (i==1 && j == 1)){
+            initPion[i][j] = "o";
+          }
+          else{
+            initPion[i][j] = '';
+          }
+        }
+      }
+      
+
       return(
         <View style={styles.container}>
           <View style={styles.buttonContainer}>
@@ -258,7 +275,8 @@ export default function App() {
             console.log("lancer la partie");
             update(ref(db, 'games/' + codePartie), {
               game_status : "running",
-              board : initPlateau
+              board : initPlateau,
+              pion : initPion,
               }).catch((error) => {alert(error);});
             setShowBoardGameView(true);
             setShowCreateGameView(false);
@@ -354,9 +372,9 @@ export default function App() {
       </View>
       
       <View style={styles.lowerContainer}>
-        <Button title='Créer une partie' onPress={() => {genererCodePartie(); setShowCreateGameView(true); setWhoAmI('host')}} />
+        <Button title='Créer une partie' onPress={() => {genererCodePartie(); setShowCreateGameView(true); setWhoAmI('v')}} />
         <Text style={{ height: 50 }}>{''}</Text>
-        <Button title='Rejoindre une partie' onPress={() => {setShowJoinGameView(true); setWhoAmI('guest')}} />
+        <Button title='Rejoindre une partie' onPress={() => {setShowJoinGameView(true); setWhoAmI('o')}} />
       </View>
     </View>
   );
