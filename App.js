@@ -193,7 +193,6 @@ export default function App() {
 
   if (showCreateGameView && isDataFetched) {
     if(currentGameData.game_status=='waiting'){
-      console.log("ici")
       return (
         <View style={styles.container}>
           <View style={styles.buttonContainer}>
