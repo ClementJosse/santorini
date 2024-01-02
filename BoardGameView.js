@@ -104,7 +104,7 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
             }
           }}
         >
-          <View style={[styles.cell, { opacity: turnstatus === "selectPion" ? 0.5 : 1 }]}>
+          <View style={[styles.cell, { opacity: turnstatus === "selectPion" && !DansLeCarre(rowIndex, colIndex) ? 0.5 : 1 }]}>
             <Image
               source={getImageCase(colIndex, rowIndex)}
               style={[styles.image, colIndex !== 0 && { marginLeft: calcul }]}
