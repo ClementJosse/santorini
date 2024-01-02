@@ -10,9 +10,24 @@ var selectedCol = '';
 
 console.log(selectedRow,selectedCol)
 
-function DansLeCarre(rowIndex, colIndex) {
+function DansLeCarre(rowIndex, colIndex, currentGameData, turnstatus) {
   if (selectedRow + 1 >= rowIndex && selectedRow - 1 <= rowIndex && selectedCol + 1 >= colIndex && selectedCol - 1 <= colIndex) {
-    return true;
+    if(turnstatus == "selectPion"){
+      if(currentGameData.pion[colIndex][rowIndex]==""||(selectedCol==colIndex&&selectedRow==rowIndex)){
+        if((currentGameData.board[colIndex][rowIndex])-1<=currentGameData.board[selectedCol][selectedRow]){
+          if(currentGameData.board[colIndex][rowIndex]<=3){
+            return true
+          }
+        }
+      }
+    }
+    else if(turnstatus=="case"){
+      if(currentGameData.pion[colIndex][rowIndex]==""){
+        if(currentGameData.board[colIndex][rowIndex]<=3){
+          return true
+        }
+      }
+    }
   } else {
     return false;
   }
@@ -42,7 +57,7 @@ const imagePionV = {
   4: require('./assets/3pion_v.png'),
 }
 
-const BoutonTest = (codePartie, whoAmI) => {
+const FinDeTour = (codePartie, whoAmI) => {
   const newTurn = whoAmI === 'v' ? 'o' : 'v';
   update(ref(db, 'games/' + codePartie), {
     turn: newTurn,
@@ -97,7 +112,7 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
                   selectedRow = '';
                   setTurnstatus("pion");
                   console.log(turnstatus)
-                } else if (DansLeCarre(rowIndex, colIndex)) {
+                } else if (DansLeCarre(rowIndex, colIndex,currentGameData,turnstatus)) {
                   update(ref(db, `games/${codePartie}/pion/${selectedCol}`), {
                     [selectedRow]: "",
                   }).catch((error) => {
@@ -110,16 +125,23 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
                     alert(error);
                   });
                   
-                  selectedRow = '';
-                  selectedCol = '';
-                  setTurnstatus('pion');
+                  selectedRow = rowIndex;
+                  selectedCol = colIndex;
+                  setTurnstatus('case');
+                  
 
+                }
+              } else if (turnstatus === "case"){
+                if(DansLeCarre(rowIndex,colIndex,currentGameData,turnstatus)&&(selectedCol!=colIndex || selectedRow != rowIndex)){
+                  UpdateBoard(codePartie,rowIndex,colIndex,currentGameData);
+                  setTurnstatus('pion')
+                  FinDeTour(codePartie,whoAmI)
                 }
               }
             }
           }}
         >
-          <View style={[styles.cell, { opacity: turnstatus === "selectPion" && !DansLeCarre(rowIndex, colIndex) ? 0.5 : 1 }]}>
+          <View style={[styles.cell, { opacity: (turnstatus === "selectPion"|| turnstatus === "case") && !DansLeCarre(rowIndex, colIndex,currentGameData, turnstatus) ? 0.5 : 1 }]}>
             <Image
               source={getImageCase(colIndex, rowIndex)}
               style={[styles.image, colIndex !== 0 && { marginLeft: calcul }]}
@@ -151,7 +173,7 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
           onPress={() => {
             console.log(whoAmI);
             console.log(currentGameData.board);
-            BoutonTest(codePartie, whoAmI);
+            FinDeTour(codePartie, whoAmI);
             setTurnstatus('pion'); // Reset the turnstatus after the button is pressed
           }}
         />
