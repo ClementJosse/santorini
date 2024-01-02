@@ -8,12 +8,12 @@ const calcul = -((100) / 450) * (Dimensions.get('window').width / 5);
 var selectedRow = '';
 var selectedCol = '';
 
+console.log(selectedRow,selectedCol)
+
 function DansLeCarre(rowIndex, colIndex) {
   if (selectedRow + 1 >= rowIndex && selectedRow - 1 <= rowIndex && selectedCol + 1 >= colIndex && selectedCol - 1 <= colIndex) {
-    console.log(true)
     return true;
   } else {
-    console.log(false)
     return false;
   }
 }
@@ -85,20 +85,35 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
             console.log(`Clicked at position [${rowIndex};${colIndex}]`);
             if (currentGameData.turn === whoAmI) {
               if (turnstatus === "pion") {
-                if (currentGameData.turn === currentGameData.pion[rowIndex][colIndex]) {
+                if (currentGameData.turn === currentGameData.pion[colIndex][rowIndex]) {
                   selectedCol = colIndex;
                   selectedRow = rowIndex;
                   setTurnstatus("selectPion");
                   console.log(turnstatus)
                 }
               } else if (turnstatus === "selectPion") {
-                if (currentGameData.turn === currentGameData.pion[rowIndex][colIndex]) {
+                if (rowIndex==selectedRow && colIndex==selectedCol) {
                   selectedCol = '';
                   selectedRow = '';
                   setTurnstatus("pion");
                   console.log(turnstatus)
                 } else if (DansLeCarre(rowIndex, colIndex)) {
-                  console.log("dans le carré !")
+                  update(ref(db, `games/${codePartie}/pion/${selectedCol}`), {
+                    [selectedRow]: "",
+                  }).catch((error) => {
+                    alert(error);
+                  });
+
+                  update(ref(db, `games/${codePartie}/pion/${colIndex}`), {
+                    [rowIndex]: whoAmI,
+                  }).catch((error) => {
+                    alert(error);
+                  });
+                  
+                  selectedRow = '';
+                  selectedCol = '';
+                  setTurnstatus('pion');
+
                 }
               }
             }
@@ -137,7 +152,7 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
             console.log(whoAmI);
             console.log(currentGameData.board);
             BoutonTest(codePartie, whoAmI);
-            setTurnstatus(''); // Reset the turnstatus after the button is pressed
+            setTurnstatus('pion'); // Reset the turnstatus after the button is pressed
           }}
         />
       )}
