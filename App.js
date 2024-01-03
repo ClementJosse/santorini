@@ -2,7 +2,7 @@
 // npx expo start
 
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, Button, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Image, Button, TextInput ,TouchableOpacity,Clipboard} from 'react-native';
 import 'expo-dev-client';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
@@ -19,6 +19,12 @@ export default function App() {
   const [codePartie, setCodePartie] = useState('');
   const [currentGameData, setCurrentGameData] = useState(null);
   
+  const [copiedText, setCopiedText] = useState('');
+
+  const copyToClipboard = () => {
+    Clipboard.setString(codePartie);
+  };
+
   const getCodePartie = () => {
     return codePartie;
   };
@@ -32,6 +38,8 @@ export default function App() {
   GoogleSignin.configure({
     webClientId:'839487671755-gboic9mvgt87mkvtmvqqvi830n17k869.apps.googleusercontent.com',
   });
+
+  
 
   function onAuthStateChanged(user) {
     setUser(user);
@@ -199,7 +207,9 @@ export default function App() {
           <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); setIsDataFetched(false); console.log("menu") }} />
           </View>
           <Text style={styles.title}>Code de la partie:</Text>
-          <Text style={styles.code}>{codePartie}</Text> 
+          <TouchableOpacity onPress={() => copyToClipboard()}>
+            <Text style={styles.code}>{codePartie}</Text>
+          </TouchableOpacity>
           <View style={[styles.upperContainer]}>
             <View style={styles.profileContainer}>
               <View style={styles.imageContainer}>
@@ -248,7 +258,9 @@ export default function App() {
           <Button title="< Menu" onPress={() => { supprimerCode(); setShowCreateGameView(false); setWhoAmI(''); console.log("menu") }} />
           </View>
           <Text style={styles.title}>Code de la partie:</Text>
-          <Text style={styles.code}>{codePartie}</Text> 
+          <TouchableOpacity onPress={() => copyToClipboard()}>
+            <Text style={styles.code}>{codePartie}</Text>
+          </TouchableOpacity>
           <View style={[styles.versusContainer]}>
             <View style={styles.profileContainer}>
               <View style={styles.imageContainer}>
@@ -317,25 +329,41 @@ export default function App() {
     return (
       <View style={[styles.container]}>
         <View>
-          <Button
-            title="< Retour"
-            onPress={() => {
-              QuitterGame(codePartie);
-              setShowWaitingRoomView(false);
-              setShowJoinGameView(true);
-              setIsDataFetched(false)
-            }}
-          />
+          <View style={styles.buttonContainer}>
+            <Button
+              title="< Retour"
+              onPress={() => {
+                QuitterGame(codePartie);
+                setShowWaitingRoomView(false);
+                setShowJoinGameView(true);
+                setIsDataFetched(false)
+              }}
+            />
+          </View>
         </View>
-        <View style={[styles.upperContainer]}>
-          <Image source={{ uri: currentGameData.host_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}
-          />
-          <Text>{currentGameData.host_name}</Text>
-
-          <Image source={{ uri: currentGameData.guest_picture }} 
-          style={{ height: 50, width: 50, borderRadius: 75 }}/>
-          <Text>{currentGameData.guest_name}</Text>
+        <Text style={styles.title}>Code de la partie:</Text>
+        <TouchableOpacity onPress={() => copyToClipboard()}>
+          <Text style={styles.code}>{codePartie}</Text>
+        </TouchableOpacity>
+        <View style={[styles.versusContainer]}>
+          <View style={styles.profileContainer}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: currentGameData.host_picture }}
+                style={{ height: 50, width: 50, borderRadius: 75 }}
+              />
+            </View>
+            <Text style={styles.text}>{currentGameData.host_name}</Text>
+          </View>
+          <View style={styles.profileContainer}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: currentGameData.guest_picture }}
+                style={{ height: 50, width: 50, borderRadius: 75 }}
+              />
+            </View>
+            <Text style={styles.text}>{currentGameData.guest_name}</Text>
+          </View>   
         </View>
       </View>
     );
@@ -426,6 +454,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     marginBottom: 20,
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
   backButton: {
     backgroundColor: '#3498db',
