@@ -344,7 +344,7 @@ export default function App() {
   if (showBoardGameView && isDataFetched) {
     return (
       <View style={[styles.container]}>
-        <BoardGameView whoAmI={whoAmI} currentGameData={currentGameData} codePartie={codePartie}/>
+        <BoardGameView whoAmI={whoAmI} currentGameData={currentGameData} codePartie={codePartie} setShowBoardGameView={setShowBoardGameView}/>
       </View>
     );
   }
@@ -384,6 +384,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column', // Utilisation de flexbox avec une disposition en colonne
     paddingHorizontal: 20,
+    paddingVertical: 20,
     flex: 1, // Permet à la vue de s'étendre pour occuper tout l'espace vertical disponible
     justifyContent: 'center', // Centre les éléments horizontalement
     backgroundColor: '#84D2F9',

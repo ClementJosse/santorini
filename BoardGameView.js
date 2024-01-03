@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Image, Button, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Image, Button, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
 import { update, ref } from 'firebase/database';
 import { db } from './firebaseconfig';
 
@@ -74,7 +74,7 @@ const UpdateBoard = (codePartie, rowIndex, colIndex, currentGameData) => {
   });
 };
 
-const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
+const BoardGameView = ({ whoAmI, currentGameData, codePartie, setShowBoardGameView}) => {
   const [turnstatus, setTurnstatus] = useState('pion');
   const numRows = 5;
   const numCols = 5;
@@ -113,23 +113,36 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
                   setTurnstatus("pion");
                   console.log(turnstatus)
                 } else if (DansLeCarre(rowIndex, colIndex,currentGameData,turnstatus)) {
-                  update(ref(db, `games/${codePartie}/pion/${selectedCol}`), {
-                    [selectedRow]: "",
-                  }).catch((error) => {
-                    alert(error);
-                  });
-
-                  update(ref(db, `games/${codePartie}/pion/${colIndex}`), {
-                    [rowIndex]: whoAmI,
-                  }).catch((error) => {
-                    alert(error);
-                  });
                   
-                  selectedRow = rowIndex;
-                  selectedCol = colIndex;
-                  setTurnstatus('case');
-                  
+                  if(currentGameData.board[colIndex][rowIndex]==3){
+                    setTurnstatus("win");
+                    
+                    update(ref(db, 'games/' + codePartie), {
+                      game_status: "win",
+                    }).catch((error) => {
+                      alert(error);
+                    });
 
+                  }
+                  else{
+                    update(ref(db, `games/${codePartie}/pion/${selectedCol}`), {
+                      [selectedRow]: "",
+                    }).catch((error) => {
+                      alert(error);
+                    });
+
+                    update(ref(db, `games/${codePartie}/pion/${colIndex}`), {
+                      [rowIndex]: whoAmI,
+                    }).catch((error) => {
+                      alert(error);
+                    });
+
+
+                    selectedRow = rowIndex;
+                    selectedCol = colIndex;
+                    setTurnstatus('case');
+
+                  }
                 }
               } else if (turnstatus === "case"){
                 if(DansLeCarre(rowIndex,colIndex,currentGameData,turnstatus)&&(selectedCol!=colIndex || selectedRow != rowIndex)){
@@ -160,13 +173,29 @@ const BoardGameView = ({ whoAmI, currentGameData, codePartie }) => {
 
   return (
     <View style={styles.container}>
-      {Array.from({ length: numRows }).map((_, rowIndex) => renderRow(rowIndex))}
+
       <View style={styles.row}>
         <Image source={require('./assets/0pion_o.png')} style={styles.image} />
         <Image source={require('./assets/0pion_o.png')} style={styles.image} />
         <Image source={require('./assets/0pion_v.png')} style={styles.image} />
         <Image source={require('./assets/0pion_v.png')} style={styles.image} />
       </View>
+
+      {Array.from({ length: numRows }).map((_, rowIndex) => renderRow(rowIndex))}
+      
+      {currentGameData.game_status==="win" && (
+        <View style={styles.overlay}>
+          <Text style={styles.overlayText}>Vous avez gagné !</Text>
+          <Button
+            title="Retourner au Menu"
+            onPress={() => {
+              setShowBoardGameView(false)
+            }}
+          />
+        </View>
+      )}
+
+      
       {currentGameData.turn === whoAmI && (
         <Button
           title="Passer"
@@ -203,6 +232,19 @@ const styles = StyleSheet.create({
   },
   cell: {
     position: 'relative',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  overlayText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+
   },
 });
 
