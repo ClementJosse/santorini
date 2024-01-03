@@ -100,15 +100,19 @@ export default function App() {
   };
 
   const genererCodePartie = () => {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let code = '';
-
-    for (let i = 0; i < 5; i++) {
+    const caracteres = '0123456789';
+    
+    for (let i = 0; i < 4; i++) {
       const caractereAleatoire = caracteres.charAt(Math.floor(Math.random() * caracteres.length));
       code += caractereAleatoire;
     }
-    setCodePartie(code);
-    console.log("+",code);
+    
+    // Utilisation de padStart pour garantir une longueur de 5 caractères avec des zéros à gauche
+    const codeFormate = code.padStart(4, '0');
+    
+    setCodePartie(codeFormate);
+    console.log("+", codeFormate);
 
     //POST DATA
     set(ref(db, 'games/' + code), {
